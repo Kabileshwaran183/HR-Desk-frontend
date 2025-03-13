@@ -57,7 +57,7 @@ const JobApplication = () => {
     };
 
     try {
-        const response = await fetch("http://localhost:5000/api/jobapplications", { 
+        const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications", { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(applicationData)
