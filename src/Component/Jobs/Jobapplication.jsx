@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import * as pdfjs from "pdfjs-dist";
 import "pdfjs-dist/build/pdf.worker.min";
@@ -17,8 +17,10 @@ const JobApplication = () => {
     const [skills, setSkills] = useState("");
     const [location, setLocation] = useState("");
     const [pincode, setPincode] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [isParsing, setIsParsing] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [parsed, setParsed] = useState(false);
+    const [notification, setNotification] = useState({ show: false, message: '', type: '' });
 
     const handleFileChange = async (event) => {
         const file = event.target.files[0];
@@ -32,7 +34,7 @@ const JobApplication = () => {
         setLastName("");
         setSkills("");
         setExperience("");
-        setLoading(true);
+        setIsParsing(true);
         setParsed(false);
 
         setResumeName(file.name);
@@ -46,7 +48,7 @@ const JobApplication = () => {
         event.target.value = null;
     };
 const handleSubmit = async (e) => {
-    setLoading(true); // Start loading state
+    setIsSubmitting(true); // Start submitting state
     e.preventDefault();
 
     const applicationData = {
@@ -66,17 +68,21 @@ const handleSubmit = async (e) => {
 
         const data = await response.json();
         if (response.ok) {
-            alert("✅ Application Submitted!");
+            setNotification({ show: true, message: 'Application Submitted Successfully!', type: 'success' });
             setFirstName("");
             setLastName("");
             setResumeName(""); // Reset resume
+            // Redirect to home after 2 seconds to allow notification to be seen
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
         } else {
-            alert("❌ Error: " + data.error);
+            setNotification({ show: true, message: `Error: ${data.error}`, type: 'error' });
         }
     } catch (error) {
         console.error("Error submitting application:", error);
     } finally {
-        setLoading(false); // Reset loading state after submission
+        setIsSubmitting(false); // Reset submitting state after submission
     }
 };
 
@@ -180,7 +186,7 @@ const handleSubmit = async (e) => {
             console.error("❌ Error parsing resume with AI:", error);
         }
 
-        setLoading(false);
+        setIsParsing(false);
         setParsed(true);
     };
 
@@ -193,15 +199,66 @@ const handleSubmit = async (e) => {
         setLastName("");
         setSkills("");
         setExperience("");
-        setLoading(false);
+        setIsParsing(false);
         setParsed(false);
 
         // Reset the file input manually
         document.getElementById("resumeUpload").value = "";
     };
 
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification({ ...notification, show: false });
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
     return (
-        <div className="max-w-3xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+        <div className="relative max-w-3xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+            {notification.show && (
+                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${
+                    notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                    <div className="flex items-center">
+                        {notification.type === 'success' ? (
+                            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        ) : (
+                            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        )}
+                        <span>{notification.message}</span>
+                    </div>
+                </div>
+            )}
+            {isSubmitting && (
+                <div className="fixed inset-0 z-50">
+                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-200">
+                        <div className="h-full bg-blue-500 animate-progress"></div>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+                        <div className="bg-white rounded-lg p-8 shadow-xl max-w-md w-full mx-4 backdrop-blur-sm">
+                            <div className="relative w-20 h-20">
+                                <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+                                <div className="absolute inset-2 border-t-4 border-blue-500 rounded-full animate-spin"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <svg className="w-8 h-8 text-blue-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div className="text-center px-6 py-3 bg-white shadow-md rounded-lg">
+                                <h3 className="text-lg font-medium text-gray-800">Processing Submission</h3>
+                                <p className="text-gray-600 mt-1">We're securely sending your application...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                 Apply for Job ID: {id}
             </h2>
@@ -236,7 +293,12 @@ const handleSubmit = async (e) => {
                     )}
                 </div>
 
-                {parsed && (
+                {isParsing && (
+                    <div className="flex justify-center mt-4">
+                        <div className="w-12 h-12 border-4 border-t-transparent border-blue-500 border-solid rounded-full animate-spin"></div>
+                    </div>
+                )}
+                {parsed && !isParsing && (
                     <div className="text-green-600 mt-4 text-center">
                         <p>Resume parsed successfully. Carefully review your information before submitting the application.</p>
                     </div>
@@ -377,14 +439,14 @@ const handleSubmit = async (e) => {
                     <button 
                         onClick={handleSubmit}
                         type="submit"
-                        disabled={loading}
+                        disabled={isSubmitting}
                         className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${
-                            loading 
+                            isSubmitting 
                                 ? 'bg-blue-400 cursor-not-allowed' 
                                 : 'bg-blue-600 hover:bg-blue-700'
                         }`}
                     >
-                        {loading ? (
+                        {isSubmitting ? (
                             <>
                                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -398,9 +460,9 @@ const handleSubmit = async (e) => {
                     </button>
                     <button
                         type="button"
-                        disabled={loading}
+                        disabled={isSubmitting}
                         className={`w-48 text-white p-3 rounded-lg transition duration-300 ${
-                            loading 
+                            isSubmitting 
                                 ? 'bg-gray-300 cursor-not-allowed' 
                                 : 'bg-gray-400 hover:bg-gray-500'
                         }`}
