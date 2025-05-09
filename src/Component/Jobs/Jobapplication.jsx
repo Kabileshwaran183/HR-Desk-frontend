@@ -8,7 +8,6 @@ const JobApplication = () => {
     const { id } = useParams();
     const location = useRouterLocation();
     const jobTitleFromState = location.state?.jobTitle || "";
-
     const [resumeName, setResumeName] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -64,9 +63,9 @@ const JobApplication = () => {
             gender,
             experience,
             skills,
-            location: currentLocation,
+                // location: currentLocation, // Removed as per user request
             pincode,
-            jobTitle: jobTitleFromState || "N/A",
+            jobTitle: jobTitleFromState ? jobTitleFromState : "N/A",
             resume: resumeName || "N/A",  // Ensure resume is not empty
             status: "Pending" // Default status
         };
@@ -268,7 +267,7 @@ const JobApplication = () => {
                 </div>
             )}
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Apply for Job ID: {id}
+                Apply for Job: {jobTitleFromState} 
             </h2>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
@@ -417,17 +416,7 @@ const JobApplication = () => {
                 </div>
 
                 {/* Location */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Current Location</label>
-                    <input
-                        type="text"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className="mt-1 p-2 w-full border rounded-lg"
-                        placeholder="Enter your current location"
-                        required
-                    />
-                </div>
+                {/* Removed Location input as per user request */}
 
                 {/* Pincode */}
                 <div>
