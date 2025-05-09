@@ -47,50 +47,47 @@ const JobApplication = () => {
         // Reset the input field to allow re-uploading the same file
         event.target.value = null;
     };
-const handleSubmit = async (e) => {
-    setIsSubmitting(true); // Start submitting state
-    e.preventDefault();
 
-    const applicationData = {
-        firstName,
-        lastName,
-        email,
-        resume: resumeName,  // ✅ Use resumeName instead of undefined resume
-        status: "Pending" // Default status
+    const handleSubmit = async (e) => {
+        setIsSubmitting(true); // Start submitting state
+        e.preventDefault();
+
+        const applicationData = {
+            firstName,
+            lastName,
+            email,
+            resume: resumeName,  // ✅ Use resumeName instead of undefined resume
+            status: "Pending" // Default status
+        };
+
+        try {
+            const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications", { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(applicationData)
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setNotification({ show: true, message: 'Application Submitted Successfully!', type: 'success' });
+                setFirstName("");
+                setLastName("");
+                setResumeName(""); // Reset resume
+                // Redirect to home after 2 seconds to allow notification to be seen
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                setNotification({ show: true, message: `Error: ${data.error}`, type: 'error' });
+            }
+        } catch (error) {
+            console.error("Error submitting application:", error);
+        } finally {
+            setIsSubmitting(false); // Reset submitting state after submission
+        }
     };
 
-    try {
-        const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications", { 
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(applicationData)
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            setNotification({ show: true, message: 'Application Submitted Successfully!', type: 'success' });
-            setFirstName("");
-            setLastName("");
-            setResumeName(""); // Reset resume
-            // Redirect to home after 2 seconds to allow notification to be seen
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
-        } else {
-            setNotification({ show: true, message: `Error: ${data.error}`, type: 'error' });
-        }
-    } catch (error) {
-        console.error("Error submitting application:", error);
-    } finally {
-        setIsSubmitting(false); // Reset submitting state after submission
-    }
-};
-
-    
-
-
-
-    // **📌 Function to Extract Text from PDF (for Regex Extraction of Email & Phone)**
+// **📌 Function to Extract Text from PDF (for Regex Extraction of Email & Phone)**
     const extractTextFromPDF = async (file) => {
         try {
             pdfjs.GlobalWorkerOptions.workerSrc = new URL(

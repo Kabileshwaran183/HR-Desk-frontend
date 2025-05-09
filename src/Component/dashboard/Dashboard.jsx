@@ -1,0 +1,60 @@
+import React, { useEffect, useState } from "react";
+
+const Dashboard = () => {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications");
+        if (!response.ok) {
+          throw new Error("Failed to fetch applications");
+        }
+        const data = await response.json();
+        setApplications(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  return (
+    <div className="max-w-5xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-blue-700 border-b-2 border-blue-300 pb-2">
+        Applicants Dashboard
+      </h1>
+      {loading && <p className="text-gray-600">Loading applications...</p>}
+      {error && <p className="text-red-600">Error: {error}</p>}
+      {!loading && !error && applications.length === 0 && (
+        <p className="text-gray-600">No applications found.</p>
+      )}
+      <div className="flex flex-col space-y-4">
+        {applications.map((app) => (
+          <div
+            key={app._id}
+            className="bg-white shadow-md rounded-lg p-6 border border-gray-300 hover:shadow-lg transition-shadow duration-300"
+          >
+            <h2 className="text-2xl font-semibold mb-2 text-blue-800">
+              {app.firstName} {app.lastName}
+            </h2>
+            <div className="text-gray-700 space-y-1">
+              <p><span className="font-semibold">Phone:</span> {app.phoneNumber || "N/A"}</p>
+              <p><span className="font-semibold">Email:</span> {app.email}</p>
+              <p><span className="font-semibold">Year of Graduation:</span> {app.yearOfGraduation || "N/A"}</p>
+              <p><span className="font-semibold">Skills:</span> {app.skills || "N/A"}</p>
+              <p><span className="font-semibold">Applied On:</span> {new Date(app.createdAt).toLocaleString()}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
