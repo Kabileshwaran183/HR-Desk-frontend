@@ -22,7 +22,7 @@ const JobList = () => {
                         <p className="text-gray-600 mt-3 text-sm leading-relaxed">{job.description}</p>
                         <div className="flex items-center justify-between mt-4">
                             <span className="text-green-600 font-medium">{job.type}</span>
-                            <Link to={`/apply/${job.id}`} className="text-gray-400 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                            <Link to={`/apply/${job.id}`} state={{ jobTitle: job.title }} className="text-gray-400 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
                                 <ArrowRight size={18} />
                             </Link>
                         </div>

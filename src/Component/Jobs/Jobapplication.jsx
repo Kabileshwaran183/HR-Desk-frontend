@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation as useRouterLocation } from "react-router-dom";
 import * as pdfjs from "pdfjs-dist";
 import "pdfjs-dist/build/pdf.worker.min";
 import { FaTimesCircle } from "react-icons/fa";
 
 const JobApplication = () => {
     const { id } = useParams();
+    const location = useRouterLocation();
+    const jobTitleFromState = location.state?.jobTitle || "";
+
     const [resumeName, setResumeName] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
@@ -15,7 +18,7 @@ const JobApplication = () => {
     const [gender, setGender] = useState("");
     const [experience, setExperience] = useState("");
     const [skills, setSkills] = useState("");
-    const [location, setLocation] = useState("");
+    const [currentLocation, setCurrentLocation] = useState("");
     const [pincode, setPincode] = useState("");
     const [isParsing, setIsParsing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +59,15 @@ const JobApplication = () => {
             firstName,
             lastName,
             email,
-            resume: resumeName,  // ✅ Use resumeName instead of undefined resume
+            phoneNumber,
+            yearOfGraduation,
+            gender,
+            experience,
+            skills,
+            location: currentLocation,
+            pincode,
+            jobTitle: jobTitleFromState || "N/A",
+            resume: resumeName || "N/A",  // Ensure resume is not empty
             status: "Pending" // Default status
         };
 
@@ -152,7 +163,7 @@ const JobApplication = () => {
             if (result.data) {
                 setFirstName(result.data.name?.first || "");
                 setLastName(result.data.name?.last || "");
-                setLocation(result.data.location?.text || "");
+                setCurrentLocation(result.data.location?.text || "");
                 setPincode(result.data.location?.postcode || "");
                 setYearOfGraduation(result.data.education?.[0]?.completion_date || "");
                 setGender(result.data.personal_info?.gender || "");
@@ -166,7 +177,7 @@ const JobApplication = () => {
                 const extractedSkills = result.data.skills
                     ?.map(skill => skill.name.trim())
                     ?.filter(skill => skill.length > 0 && !unwantedSkills.includes(skill))
-                    ?.join(", ") || "No relevant skills found";
+                    ?.join(", ") || "";
 
                 setSkills(extractedSkills);
 
