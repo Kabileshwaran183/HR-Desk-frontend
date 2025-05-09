@@ -40,28 +40,28 @@ const Dashboard = () => {
             key={app._id}
             className="bg-white shadow-md rounded-lg p-6 border border-gray-300 hover:shadow-lg transition-shadow duration-300"
           >
-              <h2 className="text-2xl font-semibold mb-4 text-blue-800">
-                {app.firstName} {app.lastName}
-              </h2>
-              <p className="text-lg font-semibold mb-2 text-purple-700">Job Title: {app.jobTitle || "N/A"}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-gray-700">
-                <div>
-                  <p><span className="font-semibold">Phone:</span> {app.phoneNumber || "N/A"}</p>
-                  <p><span className="font-semibold">Email:</span> {app.email}</p>
-                  <p><span className="font-semibold">Year of Graduation:</span> {app.yearOfGraduation || "N/A"}</p>
-                  <p><span className="font-semibold">Gender:</span> {app.gender || "N/A"}</p>
-                  <p><span className="font-semibold">Experience:</span> {app.experience || "N/A"}</p>
-                  <p><span className="font-semibold">Location:</span> {app.location || "N/A"}</p>
-                  <p><span className="font-semibold">Pincode:</span> {app.pincode || "N/A"}</p>
-                </div>
-                <div>
-                  <p><span className="font-semibold">Skills:</span> {app.skills || "N/A"}</p>
-                  <p><span className="font-semibold">Resume:</span> {app.resume || "N/A"}</p>
-                  <p><span className="font-semibold">Status:</span> {app.status || "Pending"}</p>
-                  <p><span className="font-semibold">Applied On:</span> {new Date(app.createdAt).toLocaleString()}</p>
-                </div>
+            <h2 className="text-2xl font-semibold mb-4 text-blue-800">
+              {app.firstName} {app.lastName}
+            </h2>
+            <p className="text-lg font-semibold mb-2 text-purple-700">Job Title: {app.jobTitle || "N/A"}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-gray-700">
+              <div>
+                <p><span className="font-semibold">Phone:</span> {app.phoneNumber || "N/A"}</p>
+                <p><span className="font-semibold">Email:</span> {app.email}</p>
+                <p><span className="font-semibold">Year of Graduation:</span> {app.yearOfGraduation || "N/A"}</p>
+                <p><span className="font-semibold">Gender:</span> {app.gender || "N/A"}</p>
+                <p><span className="font-semibold">Experience:</span> {app.experience || "N/A"}</p>
+                <p><span className="font-semibold">Location:</span> {app.location || "N/A"}</p>
+                <p><span className="font-semibold">Pincode:</span> {app.pincode || "N/A"}</p>
+              </div>
+              <div>
+                <p><span className="font-semibold">Skills:</span> {app.skills || "N/A"}</p>
+                <p><span className="font-semibold">Resume:</span> {app.resume || "N/A"}</p>
+                <p><span className="font-semibold">Status:</span> {app.status || "Pending"}</p>
+                <p><span className="font-semibold">Applied On:</span> {new Date(app.createdAt).toLocaleString()}</p>
               </div>
             </div>
+          </div>
         ))}
       </div>
     </div>
