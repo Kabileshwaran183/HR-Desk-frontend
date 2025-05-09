@@ -6,6 +6,8 @@ import JobApplication from "./Component/Jobs/Jobapplication"; // Import Job Appl
 import Navbar from "./Component/Navbar";
 import NotFound from "./Component/RouteNootFound";
 import Dashboard from "./Component/dashboard/Dashboard";
+import Login from "./Component/login/Login";
+import Register from "./Component/login/Register";
 
 function App() {
   return (
@@ -23,6 +25,9 @@ function App() {
         />
         <Route path="/apply/:id" element={<JobApplication />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

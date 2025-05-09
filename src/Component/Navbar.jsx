@@ -45,10 +45,12 @@ const Navbar = () => {
 
            
             <div className="flex items-center space-x-4">
-                <a href="#" className="text-red-500 hover:underline">Log in</a>
-                <span className="text-gray-400">|</span>
-                <a href="#" className="text-red-500 hover:underline">Register</a>
+                <Link to="/login" className="text-red-500 hover:underline">Login</Link>
+              
 
+                <span className="text-gray-400">|</span>
+                
+                <Link to="/register" className="text-red-500 hover:underline">Register</Link>
                 
                 <FaFacebookF className="text-blue-600 text-xl cursor-pointer" />
                 <FaInstagram className="text-pink-500 text-xl cursor-pointer" />
