@@ -15,11 +15,11 @@ export default function Sidebar() {
     const location = useLocation();
 
     const navItems = [
-        { name: "Dashboard", path: "/" },
-        { name: "Analytics", path: "/analytics" },
-        { name: "Task List", path: "/task-list" },
-        { name: "Tracking", path: "/tracking" },
-        { name: "Setting", path: "/setting" },
+        { name: "Dashboard", path: "/Dashboard" },
+        { name: "Analytics", path: "/Dashboard/analytics" },
+        { name: "Task List", path: "/Dashboard/task-list" },
+        { name: "Tracking", path: "/Dashboard/tracking" },
+        { name: "Setting", path: "/Dashboard/setting" },
     ];
 
     return (

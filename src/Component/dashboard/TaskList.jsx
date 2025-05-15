@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const Dashboard = () => {
+const Userlist = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -68,4 +68,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Userlist 
