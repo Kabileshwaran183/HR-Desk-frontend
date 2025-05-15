@@ -310,6 +310,18 @@ const JobApplication = () => {
                         <p>Resume parsed successfully. Carefully review your information before submitting the application.</p>
                     </div>
                 )}
+                {/* Job title*/}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Job Title</label>
+                    <input
+                        type="text"
+                        value={jobTitleFromState}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="mt-1 p-2 w-full border rounded-lg"
+                        placeholder={jobTitleFromState}
+                        required
+                    />
+                </div>
 
                 {/* First Name */}
                 <div>
