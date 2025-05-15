@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Hero from "./Component/Hero";
 import JobList from "./Component/Jobs/Joblist";
 import JobApplication from "./Component/Jobs/Jobapplication"; // Import Job Application Form
@@ -8,6 +8,7 @@ import NotFound from "./Component/RouteNootFound";
 import Dashboard from "./Component/dashboard/Dashboard";
 import Login from "./Component/login/Login";
 import Register from "./Component/login/Register";
+import PrivateRoute from "./Component/PrivateRoute"; // import it
 
 function App() {
   return (
@@ -24,10 +25,18 @@ function App() {
           }
         />
         <Route path="/apply/:id" element={<JobApplication />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
 
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        <Route path="/register" element={<Register />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
