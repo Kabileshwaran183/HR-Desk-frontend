@@ -10,6 +10,7 @@ import Login from "./Component/login/Login";
 import Register from "./Component/login/Register";
 import PrivateRoute from "./Component/PrivateRoute"; // import it
 import JobApplicants from "./Component/dashboard/JobApplicants";
+import JobInterviewManager from "./Component/dashboard/hr/JobInterviewManager";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/apply/:id" element={<JobApplication />} />
         <Route path="/login" element={<Login />} />
         <Route path="/job/:jobTitle" element={<JobApplicants />} />
+        <Route path="/interview/:jobTitle" element={<JobInterviewManager />} />
 
         <Route
           path="/dashboard"
