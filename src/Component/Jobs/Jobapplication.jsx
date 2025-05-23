@@ -6,11 +6,15 @@ import { FaTimesCircle } from "react-icons/fa";
 
 const JobApplication = () => {
     const { id } = useParams();
-    const location = useRouterLocation();
-    const jobTitleFromState = location.state?.jobTitle || "";
+    const routerLocation = useRouterLocation();
+    const jobTitleFromState = routerLocation.state?.jobTitle || "";
+    const [jobTitle, setJobTitle] = useState(jobTitleFromState || "");
     const [resumeName, setResumeName] = useState("");
     const [firstName, setFirstName] = useState("");
+    const [location, setLocation] = useState('');
     const [lastName, setLastName] = useState("");
+    
+    
     const [phoneNumber, setPhoneNumber] = useState("");
     const [email, setEmail] = useState("");
     const [yearOfGraduation, setYearOfGraduation] = useState("");
@@ -41,6 +45,7 @@ const JobApplication = () => {
 
         setResumeName(file.name);
 
+
         if (file.type === "application/pdf") {
             await extractTextFromPDF(file); // Extract email & phone via regex
         }
@@ -62,16 +67,18 @@ const JobApplication = () => {
             yearOfGraduation,
             gender,
             experience,
+            location,
             skills,
-                // location: currentLocation, // Removed as per user request
+            // location: currentLocation, // Removed as per user request
             pincode,
-            jobTitle: jobTitleFromState ? jobTitleFromState : "N/A",
+            jobTitle: jobTitleFromState || jobTitle || "N/A",
+
             resume: resumeName || "N/A",  // Ensure resume is not empty
             status: "Pending" // Default status
         };
 
         try {
-            const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications", { 
+            const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(applicationData)
@@ -97,7 +104,7 @@ const JobApplication = () => {
         }
     };
 
-// **📌 Function to Extract Text from PDF (for Regex Extraction of Email & Phone)**
+    // **📌 Function to Extract Text from PDF (for Regex Extraction of Email & Phone)**
     const extractTextFromPDF = async (file) => {
         try {
             pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -186,6 +193,7 @@ const JobApplication = () => {
                     .join("\n") || "No work experience found";
 
                 setExperience(extractedExperience);
+
             } else {
                 console.error("❌ No data received from Affinda.");
             }
@@ -225,9 +233,8 @@ const JobApplication = () => {
     return (
         <div className="relative max-w-3xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
             {notification.show && (
-                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${
-                    notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
                     <div className="flex items-center">
                         {notification.type === 'success' ? (
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +274,7 @@ const JobApplication = () => {
                 </div>
             )}
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Apply for Job: {jobTitleFromState} 
+                Apply for Job: {jobTitleFromState}
             </h2>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
@@ -277,7 +284,7 @@ const JobApplication = () => {
                         <span className="text-sm font-medium text-gray-600">
                             {resumeName ? resumeName : "Upload Your Resume (PDF, DOCX)"}
                         </span>
-                
+
                         <input
                             type="file"
                             id="resumeUpload"  // Add this ID
@@ -315,10 +322,10 @@ const JobApplication = () => {
                     <label className="block text-sm font-medium text-gray-700">Job Title</label>
                     <input
                         type="text"
-                        value={jobTitleFromState}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        value={jobTitle}
+                        onChange={(e) => setJobTitle(e.target.value)}
                         className="mt-1 p-2 w-full border rounded-lg"
-                        placeholder={jobTitleFromState}
+                        placeholder="Job Title"
                         required
                     />
                 </div>
@@ -443,17 +450,46 @@ const JobApplication = () => {
                     />
                 </div>
 
+                {/* Location */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="mt-1 p-2 w-full border rounded-lg"
+                        placeholder="Enter your location"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Resume</label>
+                    <label className="cursor-pointer inline-block p-2 w-full border rounded-lg text-center bg-gray-100 hover:bg-gray-200">
+                        {resumeName || "Choose Resume (PDF, DOC, DOCX)"}
+                        <input
+                            type="file"
+                            id="resumeUpload"
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            required
+                        />
+                    </label>
+                </div>
+
+
+
                 {/* Buttons */}
                 <div className="flex justify-between mt-6">
-                    <button 
+                    <button
                         onClick={handleSubmit}
                         type="submit"
                         disabled={isSubmitting}
-                        className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${
-                            isSubmitting 
-                                ? 'bg-blue-400 cursor-not-allowed' 
-                                : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
+                        className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${isSubmitting
+                            ? 'bg-blue-400 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
                     >
                         {isSubmitting ? (
                             <>
@@ -470,11 +506,10 @@ const JobApplication = () => {
                     <button
                         type="button"
                         disabled={isSubmitting}
-                        className={`w-48 text-white p-3 rounded-lg transition duration-300 ${
-                            isSubmitting 
-                                ? 'bg-gray-300 cursor-not-allowed' 
-                                : 'bg-gray-400 hover:bg-gray-500'
-                        }`}
+                        className={`w-48 text-white p-3 rounded-lg transition duration-300 ${isSubmitting
+                            ? 'bg-gray-300 cursor-not-allowed'
+                            : 'bg-gray-400 hover:bg-gray-500'
+                            }`}
                         onClick={handleCancelResume}
                     >
                         Cancel
