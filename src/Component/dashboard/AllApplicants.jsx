@@ -134,105 +134,108 @@ const AllApplicantsPage = () => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <h1 className="text-3xl font-bold text-center mb-6">All Applicants</h1>
-
-            {/* Low Range: 0% to 50% */}
-            <div className="mb-6 text-center">
-                <label className="block font-semibold mb-2 text-gray-700">
-                    Set Interview Date for All (0% to 50%)
-                </label>
-                <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-2">
-                    <input
-                        type="datetime-local"
-                        className="border border-gray-300 rounded p-2"
-                        value={commonDateLow}
-                        onChange={(e) => setCommonDateLow(e.target.value)}
-                    />
+            <div className="flex flex-col lg:flex-row gap-6 mb-10 items-center justify-center">
+              
+                {/* Low Range: 0% to 50% */}
+                <div className="mb-6 text-center">
+                    <label className="block font-semibold mb-2 text-gray-700">
+                        Set Interview Date for All (0% to 50%)
+                    </label>
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-2">
+                        <input
+                            type="datetime-local"
+                            className="border border-gray-300 rounded p-2"
+                            value={commonDateLow}
+                            onChange={(e) => setCommonDateLow(e.target.value)}
+                        />
+                        <button
+                            onClick={() => applyCommonDateToAll(0, 50, commonDateLow)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                        >
+                            Apply Date to All
+                        </button>
+                    </div>
                     <button
-                        onClick={() => applyCommonDateToAll(0, 50, commonDateLow)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                    >
-                        Apply Date to All
-                    </button>
-                </div>
-                <button
-                    onClick={() => handleBulkSchedule(0, 50, "low")}
-                    disabled={bulkSchedulingStatus.low}
-                    className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.low
+                        onClick={() => handleBulkSchedule(0, 50, "low")}
+                        disabled={bulkSchedulingStatus.low}
+                        className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.low
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-green-600 hover:bg-green-700"
-                        }`}
-                >
-                    {bulkSchedulingStatus.low
-                        ? "Scheduling Interviews (0%-50%)..."
-                        : "Schedule Interview for All (0% to 50%)"}
-                </button>
-            </div>
-
-            {/* High Range: 50% to 100% */}
-            <div className="mb-6 text-center">
-                <label className="block font-semibold mb-2 text-gray-700">
-                    Set Interview Date for All (50% to 100%)
-                </label>
-                <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-2">
-                    <input
-                        type="datetime-local"
-                        className="border border-gray-300 rounded p-2"
-                        value={commonDateHigh}
-                        onChange={(e) => setCommonDateHigh(e.target.value)}
-                    />
-                    <button
-                        onClick={() => applyCommonDateToAll(50, 100, commonDateHigh)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                            }`}
                     >
-                        Apply Date to All
+                        {bulkSchedulingStatus.low
+                            ? "Scheduling Interviews (0%-50%)..."
+                            : "Schedule Interview for All (0% to 50%)"}
                     </button>
                 </div>
-                <button
-                    onClick={() => handleBulkSchedule(50, 100, "high")}
-                    disabled={bulkSchedulingStatus.high}
-                    className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.high
+
+                {/* High Range: 50% to 100% */}
+                <div className="mb-6 text-center">
+                    <label className="block font-semibold mb-2 text-gray-700">
+                        Set Interview Date for All (50% to 100%)
+                    </label>
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-2">
+                        <input
+                            type="datetime-local"
+                            className="border border-gray-300 rounded p-2"
+                            value={commonDateHigh}
+                            onChange={(e) => setCommonDateHigh(e.target.value)}
+                        />
+                        <button
+                            onClick={() => applyCommonDateToAll(50, 100, commonDateHigh)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                        >
+                            Apply Date to All
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => handleBulkSchedule(50, 100, "high")}
+                        disabled={bulkSchedulingStatus.high}
+                        className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.high
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-green-600 hover:bg-green-700"
-                        }`}
-                >
-                    {bulkSchedulingStatus.high
-                        ? "Scheduling Interviews (50%-100%)..."
-                        : "Schedule Interview for All (50% to 100%)"}
-                </button>
-            </div>
-
-            {/* Full Range: 0% to 100% */}
-            <div className="mb-6 text-center">
-                <label className="block font-semibold mb-2 text-gray-700">
-                    Set Interview Date for All (0% to 100%)
-                </label>
-                <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-2">
-                    <input
-                        type="datetime-local"
-                        className="border border-gray-300 rounded p-2"
-                        value={commonDateFull}
-                        onChange={(e) => setCommonDateFull(e.target.value)}
-                    />
-                    <button
-                        onClick={() => applyCommonDateToAll(0, 100, commonDateFull)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                            }`}
                     >
-                        Apply Date to All
+                        {bulkSchedulingStatus.high
+                            ? "Scheduling Interviews (50%-100%)..."
+                            : "Schedule Interview for All (50% to 100%)"}
                     </button>
                 </div>
-                <button
-                    onClick={() => handleBulkSchedule(0, 100, "full")}
-                    disabled={bulkSchedulingStatus.full}
-                    className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.full
+
+                {/* Full Range: 0% to 100% */}
+                <div className="mb-6 text-center">
+                    <label className="block font-semibold mb-2 text-gray-700">
+                        Set Interview Date for All (0% to 100%)
+                    </label>
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-2">
+                        <input
+                            type="datetime-local"
+                            className="border border-gray-300 rounded p-2"
+                            value={commonDateFull}
+                            onChange={(e) => setCommonDateFull(e.target.value)}
+                        />
+                        <button
+                            onClick={() => applyCommonDateToAll(0, 100, commonDateFull)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                        >
+                            Apply Date to All
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => handleBulkSchedule(0, 100, "full")}
+                        disabled={bulkSchedulingStatus.full}
+                        className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.full
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-green-600 hover:bg-green-700"
-                        }`}
-                >
-                    {bulkSchedulingStatus.full
-                        ? "Scheduling Interviews (0%-100%)..."
-                        : "Schedule Interview for All (0% to 100%)"}
-                </button>
+                            }`}
+                    >
+                        {bulkSchedulingStatus.full
+                            ? "Scheduling Interviews (0%-100%)..."
+                            : "Schedule Interview for All (0% to 100%)"}
+                    </button>
+                </div>
             </div>
+           
 
             {/* Applicant Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
