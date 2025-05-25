@@ -11,8 +11,7 @@ const Dashboard = () => {
         pending: 0,
     });
     const [jobStats, setJobStats] = useState([]);
-    const [loadingStats, setLoadingStats] = useState(true);
-    const [loadingJobs, setLoadingJobs] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("user")) || { name: "Guest", email: "" };
@@ -27,45 +26,47 @@ const Dashboard = () => {
         navigate("/login");
     };
 
-    // Fetch dashboard stats
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const res = await fetch("https://hr-desk-backend.onrender.com/api/dashboard/stats");
-                if (!res.ok) throw new Error("Failed to fetch dashboard stats");
-                const data = await res.json();
-                setStats(data);
-            } catch (error) {
-                console.error("Error fetching dashboard stats:", error);
-            } finally {
-                setLoadingStats(false);
-            }
-        };
-        fetchStats();
-    }, []);
-
-    // Fetch job applications grouped by jobTitle
     useEffect(() => {
         const fetchApplications = async () => {
             try {
                 const res = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications");
                 if (res.ok) {
                     const data = await res.json();
-                    const grouped = data.reduce((acc, app) => {
+
+                    const groupedJobs = {};
+                    const statusCounts = { scheduled: 0, offer: 0, pending: 0 };
+
+                    data.forEach((app) => {
                         const title = app.jobTitle || "Untitled Job";
-                        acc[title] = (acc[title] || 0) + 1;
-                        return acc;
-                    }, {});
-                    const statsArray = Object.entries(grouped).map(([title, count]) => ({ title, count }));
+                        groupedJobs[title] = (groupedJobs[title] || 0) + 1;
+
+                        if (app.status) {
+                            const status = app.status.toLowerCase();
+                            if (statusCounts.hasOwnProperty(status)) {
+                                statusCounts[status] += 1;
+                            }
+                        }
+                    });
+
+                    const statsArray = Object.entries(groupedJobs).map(([title, count]) => ({ title, count }));
                     setJobStats(statsArray);
+
+                    setStats({
+                        totalApplicants: data.length,
+                        scheduled: statusCounts.scheduled,
+                        offers: statusCounts.offer,
+                        pending: statusCounts.pending,
+                    });
                 } else {
                     setJobStats([]);
+                    setStats({ totalApplicants: 0, scheduled: 0, offers: 0, pending: 0 });
                 }
             } catch (error) {
                 console.error("Error fetching job applications:", error);
                 setJobStats([]);
+                setStats({ totalApplicants: 0, scheduled: 0, offers: 0, pending: 0 });
             } finally {
-                setLoadingJobs(false);
+                setLoading(false);
             }
         };
         fetchApplications();
@@ -92,7 +93,7 @@ const Dashboard = () => {
                 {/* Dashboard Stats */}
                 <section>
                     <h2 className="text-2xl font-bold mb-6">Dashboard Stats</h2>
-                    {loadingStats ? (
+                    {loading ? (
                         <p>Loading stats...</p>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -107,7 +108,7 @@ const Dashboard = () => {
                 {/* Job Applications */}
                 <section>
                     <h2 className="text-2xl font-bold mb-6">Job Applications</h2>
-                    {loadingJobs ? (
+                    {loading ? (
                         <p>Loading job applications...</p>
                     ) : jobStats.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
