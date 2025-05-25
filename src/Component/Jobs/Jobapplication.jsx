@@ -9,6 +9,8 @@ const JobApplication = () => {
     const routerLocation = useRouterLocation();
     const jobTitleFromState = routerLocation.state?.jobTitle || "";
     const jobDescriptionFromState = routerLocation.state?.jobDescription || ""; // Assuming job description is passed via state
+    const requiredSkillsFromState = routerLocation.state?.requiredSkills || [];
+    const minExperienceFromState = routerLocation.state?.minExperience || 0;
     const [jobTitle, setJobTitle] = useState(jobTitleFromState || "");
     const [resumeFile, setResumeFile] = useState(null);
     const [resumeName, setResumeName] = useState("");
@@ -60,10 +62,22 @@ const JobApplication = () => {
         e.preventDefault();
         setIsSubmitting(true); // Start submitting state
 
+        // Extract numeric years of experience from experience string
+        let numericExperience = 0;
+        if (experience) {
+            // Match all numbers in the string and take the max as years of experience
+            const matches = experience.match(/\\d+/g);
+            if (matches && matches.length > 0) {
+                numericExperience = Math.max(...matches.map(num => parseInt(num, 10)));
+            }
+        }
+
         const formData = new FormData();
         formData.append("resume", resumeFile);
         formData.append("jobId", id);
         formData.append("jobDescription", jobDescriptionFromState);
+        formData.append("minExperience", minExperienceFromState);
+        formData.append("jobSkills", JSON.stringify(requiredSkillsFromState));
         formData.append("firstName", firstName);
         formData.append("lastName", lastName);
         formData.append("email", email);
@@ -71,7 +85,7 @@ const JobApplication = () => {
         formData.append("yearOfGraduation", yearOfGraduation);
         formData.append("gender", gender);
         formData.append("jobTitle", jobTitleFromState || jobTitle || "N/A");
-        formData.append("experience", experience);
+        formData.append("experience", numericExperience.toString());
         formData.append("skills", skills);
         formData.append("location", location);
         formData.append("pincode", pincode);
