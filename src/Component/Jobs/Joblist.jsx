@@ -4,11 +4,46 @@ import { Link } from 'react-router-dom';
 
 const JobList = () => {
     const jobs = [
-        { id: 1, title: "SOFTWARE DEVELOPER", description: "Design and develop high-volume, low-latency applications for mission-critical systems, ensuring top-tier availability and performance.", type: "Full time" },
-        { id: 2, title: "QA ENGINEER", description: "Experience in manual and automation testing. Knowledge of Java Programming.", type: "Full time" },
-        { id: 3, title: "SALES EXECUTIVE", description: "Build rapport with contacts and understand where the prospect is in the buying process.", type: "Full time" },
-        { id: 4, title: "APP DEVELOPMENT", description: "Build rapport with contacts and understand where the prospect is in the buying process.", type: "Full time" },
-        { id: 5, title: "WEB DEVELOPMENT", description: "Build rapport with contacts and understand where the prospect is in the buying process.", type: "Full time" }
+        { 
+            id: 1, 
+            title: "SOFTWARE DEVELOPER", 
+            description: "Design and develop high-volume, low-latency applications for mission-critical systems, ensuring top-tier availability and performance.", 
+            type: "Full time",
+            requiredSkills: ["JavaScript", "Node.js", "React", "APIs", "REST", "Agile", "Git"],
+            minExperience: 2
+        },
+        { 
+            id: 2, 
+            title: "QA ENGINEER", 
+            description: "Experience in manual and automation testing. Knowledge of Java Programming.", 
+            type: "Full time",
+            requiredSkills: ["Manual Testing", "Automation Testing", "Java"],
+            minExperience: 1
+        },
+        { 
+            id: 3, 
+            title: "SALES EXECUTIVE", 
+            description: "Build rapport with contacts and understand where the prospect is in the buying process.", 
+            type: "Full time",
+            requiredSkills: ["Communication", "Negotiation", "CRM"],
+            minExperience: 1
+        },
+        { 
+            id: 4, 
+            title: "APP DEVELOPMENT", 
+            description: "Build rapport with contacts and understand where the prospect is in the buying process.", 
+            type: "Full time",
+            requiredSkills: ["Mobile Development", "iOS", "Android", "React Native"],
+            minExperience: 2
+        },
+        { 
+            id: 5, 
+            title: "WEB DEVELOPMENT", 
+            description: "Build rapport with contacts and understand where the prospect is in the buying process.", 
+            type: "Full time",
+            requiredSkills: ["HTML", "CSS", "JavaScript", "React"],
+            minExperience: 2
+        }
     ];
 
     return (
@@ -24,7 +59,7 @@ const JobList = () => {
                         <p className="text-gray-600 mt-3 text-sm leading-relaxed">{job.description}</p>
                         <div className="flex items-center justify-between mt-4">
                             <span className="text-green-600 font-medium">{job.type}</span>
-                            <Link to={`/apply/${job.id}`} state={{ jobTitle: job.title }} className="text-gray-400 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                            <Link to={`/apply/${job.id}`} state={{ jobTitle: job.title, jobDescription: job.description, requiredSkills: job.requiredSkills, minExperience: job.minExperience }} className="text-gray-400 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
                                 <ArrowRight size={18} />
                             </Link>
                         </div>

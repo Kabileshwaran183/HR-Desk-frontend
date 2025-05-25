@@ -8,13 +8,15 @@ const JobApplication = () => {
     const { id } = useParams();
     const routerLocation = useRouterLocation();
     const jobTitleFromState = routerLocation.state?.jobTitle || "";
+    const jobDescriptionFromState = routerLocation.state?.jobDescription || ""; // Assuming job description is passed via state
+    const requiredSkillsFromState = routerLocation.state?.requiredSkills || [];
+    const minExperienceFromState = routerLocation.state?.minExperience || 0;
     const [jobTitle, setJobTitle] = useState(jobTitleFromState || "");
+    const [resumeFile, setResumeFile] = useState(null);
     const [resumeName, setResumeName] = useState("");
     const [firstName, setFirstName] = useState("");
     const [location, setLocation] = useState('');
     const [lastName, setLastName] = useState("");
-    
-    
     const [phoneNumber, setPhoneNumber] = useState("");
     const [email, setEmail] = useState("");
     const [yearOfGraduation, setYearOfGraduation] = useState("");
@@ -26,6 +28,7 @@ const JobApplication = () => {
     const [isParsing, setIsParsing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [parsed, setParsed] = useState(false);
+    const [parsedResumeData, setParsedResumeData] = useState(null);
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
 
     const handleFileChange = async (event) => {
@@ -42,9 +45,9 @@ const JobApplication = () => {
         setExperience("");
         setIsParsing(true);
         setParsed(false);
-
+        setParsedResumeData(null);
+        setResumeFile(file);
         setResumeName(file.name);
-
 
         if (file.type === "application/pdf") {
             await extractTextFromPDF(file); // Extract email & phone via regex
@@ -56,55 +59,73 @@ const JobApplication = () => {
     };
 
     const handleSubmit = async (e) => {
-        setIsSubmitting(true); // Start submitting state
         e.preventDefault();
+        setIsSubmitting(true); // Start submitting state
 
-        const applicationData = {
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            yearOfGraduation,
-            gender,
-            experience,
-            location,
-            skills,
-            // location: currentLocation, // Removed as per user request
-            pincode,
-            jobTitle: jobTitleFromState || jobTitle || "N/A",
+        // Extract numeric years of experience from experience string
+        let numericExperience = 0;
+        if (experience) {
+            // Match all numbers in the string and take the max as years of experience
+            const matches = experience.match(/\\d+/g);
+            if (matches && matches.length > 0) {
+                numericExperience = Math.max(...matches.map(num => parseInt(num, 10)));
+            }
+        }
 
-            resume: resumeName || "N/A",  // Ensure resume is not empty
-            status: "Pending" // Default status
-        };
+        const formData = new FormData();
+        formData.append("resume", resumeFile);
+        formData.append("jobId", id);
+        formData.append("jobDescription", jobDescriptionFromState);
+        formData.append("minExperience", minExperienceFromState);
+        formData.append("jobSkills", JSON.stringify(requiredSkillsFromState));
+        formData.append("firstName", firstName);
+        formData.append("lastName", lastName);
+        formData.append("email", email);
+        formData.append("phoneNumber", phoneNumber);
+        formData.append("yearOfGraduation", yearOfGraduation);
+        formData.append("gender", gender);
+        formData.append("jobTitle", jobTitleFromState || jobTitle || "N/A");
+        formData.append("experience", numericExperience.toString());
+        formData.append("skills", skills);
+        formData.append("location", location);
+        formData.append("pincode", pincode);
+        formData.append("parsedResume", JSON.stringify(parsedResumeData || {}));
 
         try {
-            const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications", {
+            const response = await fetch("/api/jobapplications/apply", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(applicationData)
+                body: formData,
             });
 
-            const data = await response.json();
+            let data = null;
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                data = await response.json();
+            }
+
             if (response.ok) {
                 setNotification({ show: true, message: 'Application Submitted Successfully!', type: 'success' });
                 setFirstName("");
                 setLastName("");
-                setResumeName(""); // Reset resume
+                setResumeName("");
+                setResumeFile(null);
+                setParsedResumeData(null);
                 // Redirect to home after 2 seconds to allow notification to be seen
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 2000);
             } else {
-                setNotification({ show: true, message: `Error: ${data.error}`, type: 'error' });
+                setNotification({ show: true, message: `Error: ${data?.error || 'Unknown error'}`, type: 'error' });
             }
         } catch (error) {
             console.error("Error submitting application:", error);
+            setNotification({ show: true, message: 'Error submitting application', type: 'error' });
         } finally {
             setIsSubmitting(false); // Reset submitting state after submission
         }
     };
 
-    // **📌 Function to Extract Text from PDF (for Regex Extraction of Email & Phone)**
+    // Function to Extract Text from PDF (for Regex Extraction of Email & Phone)
     const extractTextFromPDF = async (file) => {
         try {
             pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -121,35 +142,25 @@ const JobApplication = () => {
                 text += content.items.map((item) => item.str).join(" ") + " ";
             }
 
-            console.log("Extracted Resume Text:", text);
             extractDetails(text);
         } catch (error) {
             console.error("Error extracting text from PDF:", error);
         }
     };
 
-    // **📌 Function to Extract Email & Phone via Regex**
+    // Function to Extract Email & Phone via Regex
     const extractDetails = (text) => {
-        console.log("Analyzing Extracted Text...");
-
-        // Regex for extracting phone number (+91, spaces, dashes supported)
-
         const phoneRegex = /\b(?:\+91[-\s]?)?\d{5}[-\s]?\d{5}\b/;
         const foundPhone = text.match(phoneRegex)?.[0] || "";
 
-        // Regex for extracting email
         const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/;
         const foundEmail = text.match(emailRegex)?.[0] || "";
 
-        console.log("Detected Phone Number:", foundPhone);
-        console.log("Detected Email:", foundEmail);
-
-        // Update state
         setPhoneNumber(foundPhone);
         setEmail(foundEmail);
     };
 
-    // **📌 Function to Use Affinda API for Name, Skills, Experience, etc.**
+    // Function to Use Affinda API for Name, Skills, Experience, etc.
     const parseResumeWithAI = async (file) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -164,7 +175,6 @@ const JobApplication = () => {
             });
 
             const result = await response.json();
-            console.log("📌 Affinda API Response:", result);
 
             if (result.data) {
                 setFirstName(result.data.name?.first || "");
@@ -174,7 +184,6 @@ const JobApplication = () => {
                 setYearOfGraduation(result.data.education?.[0]?.completion_date || "");
                 setGender(result.data.personal_info?.gender || "");
 
-                // **📌 Extract and Filter Skills Dynamically**
                 const unwantedSkills = [
                     "Marketing", "Marketing Materials", "Sensors", "Analytics",
                     "Intranet", "Digital Marketing", "Management"
@@ -187,24 +196,23 @@ const JobApplication = () => {
 
                 setSkills(extractedSkills);
 
-                // **📌 Extract Experience Dynamically**
-                const extractedExperience = result.data.work_experience
-                    ?.map(exp => `${exp.job_title} at ${exp.organisation}, ${exp.dates?.start_date || ""} - ${exp.dates?.end_date || "Present"}`)
-                    .join("\n") || "No work experience found";
+              const extractedExperience = result.data.work_experience
+  ?.map(exp => `${exp.job_title} at ${exp.organisation}, ${exp.dates?.start_date || ""} - ${exp.dates?.end_date || "Present"}`)
+  .join("\n") || "No work experience found";
 
                 setExperience(extractedExperience);
 
+                setParsedResumeData(result.data);
             } else {
-                console.error("❌ No data received from Affinda.");
+                console.error("No data received from Affinda.");
             }
         } catch (error) {
-            console.error("❌ Error parsing resume with AI:", error);
+            console.error("Error parsing resume with AI:", error);
         }
 
         setIsParsing(false);
         setParsed(true);
     };
-
 
     const handleCancelResume = () => {
         setResumeName("");
@@ -216,6 +224,8 @@ const JobApplication = () => {
         setExperience("");
         setIsParsing(false);
         setParsed(false);
+        setParsedResumeData(null);
+        setResumeFile(null);
 
         // Reset the file input manually
         document.getElementById("resumeUpload").value = "";
@@ -233,8 +243,8 @@ const JobApplication = () => {
     return (
         <div className="relative max-w-3xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
             {notification.show && (
-                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-fade-in ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+
                     <div className="flex items-center">
                         {notification.type === 'success' ? (
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,7 +288,7 @@ const JobApplication = () => {
             </h2>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
-                {/* 📌 Resume Upload */}
+                {/* Resume Upload */}
                 <div className="p-4 border-2 border-dashed rounded-lg text-center relative">
                     <label className="cursor-pointer flex flex-col items-center">
                         <span className="text-sm font-medium text-gray-600">
@@ -287,13 +297,12 @@ const JobApplication = () => {
 
                         <input
                             type="file"
-                            id="resumeUpload"  // Add this ID
+                            id="resumeUpload"
                             className="hidden"
-                            accept=".pdf"
+                            accept=".pdf,.doc,.docx"
                             onChange={handleFileChange}
                             required
                         />
-
                     </label>
 
                     {resumeName && (
@@ -317,7 +326,8 @@ const JobApplication = () => {
                         <p>Resume parsed successfully. Carefully review your information before submitting the application.</p>
                     </div>
                 )}
-                {/* Job title*/}
+
+                {/* Job title */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Job Title</label>
                     <input
@@ -435,7 +445,17 @@ const JobApplication = () => {
                 </div>
 
                 {/* Location */}
-                {/* Removed Location input as per user request */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="mt-1 p-2 w-full border rounded-lg"
+                        placeholder="Enter your location"
+                        required
+                    />
+                </div>
 
                 {/* Pincode */}
                 <div>
@@ -450,43 +470,13 @@ const JobApplication = () => {
                     />
                 </div>
 
-                {/* Location */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Location</label>
-                    <input
-                        type="text"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className="mt-1 p-2 w-full border rounded-lg"
-                        placeholder="Enter your location"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Upload Resume</label>
-                    <label className="cursor-pointer inline-block p-2 w-full border rounded-lg text-center bg-gray-100 hover:bg-gray-200">
-                        {resumeName || "Choose Resume (PDF, DOC, DOCX)"}
-                        <input
-                            type="file"
-                            id="resumeUpload"
-                            accept=".pdf,.doc,.docx"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            required
-                        />
-                    </label>
-                </div>
-
-
-
                 {/* Buttons */}
                 <div className="flex justify-between mt-6">
                     <button
                         onClick={handleSubmit}
                         type="submit"
                         disabled={isSubmitting}
-                        className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${isSubmitting
+                    className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${isSubmitting
                             ? 'bg-blue-400 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700'
                             }`}
@@ -518,7 +508,6 @@ const JobApplication = () => {
             </form>
         </div>
     );
-
 };
 
 export default JobApplication;
