@@ -19,6 +19,7 @@ import Tracking from "./Component/dashboard/Tracking";
 import AddApplicant from "./Component/dashboard/AddApplicant";
 import AllApplicants from "./Component/dashboard/AllApplicants";
 import AllApplicantsPage from "./Component/dashboard/AllApplicants";
+import Userlist from "./Component/dashboard/TaskList";
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
         <Route path="/job/:jobTitle" element={<JobInterviewManager />} />
         <Route path="/Dashboard/applicants" element={<AllApplicantsPage />} />
         <Route path="/Dashboard/add-applicant" element={<AddApplicant />} />
-       
+        <Route path="/Dashboard/task-list" element={<Userlist />} />
         <Route path="/Dashboard/ranking" element={<HRDashboard />} />
         <Route path="/Dashboard/analytics" element={<Analysis />} />
         <Route path="/Dashboard/tracking" element={<Tracking />} />
