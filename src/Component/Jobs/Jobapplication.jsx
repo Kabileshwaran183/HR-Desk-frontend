@@ -92,8 +92,7 @@ const JobApplication = () => {
         formData.append("parsedResume", JSON.stringify(parsedResumeData || {}));
 
         try {
-           fetch("https://hr-desk-backend.onrender.com/api/jobapplications/apply", {
-
+            const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications/apply", {
                 method: "POST",
                 body: formData,
             });
@@ -124,6 +123,7 @@ const JobApplication = () => {
         } finally {
             setIsSubmitting(false); // Reset submitting state after submission
         }
+        
     };
 
     // Function to Extract Text from PDF (for Regex Extraction of Email & Phone)
