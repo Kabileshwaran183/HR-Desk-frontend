@@ -92,7 +92,7 @@ const JobApplication = () => {
         formData.append("parsedResume", JSON.stringify(parsedResumeData || {}));
 
         try {
-            const response = await fetch("/api/jobapplications/apply", {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/jobapplications/apply`, {
                 method: "POST",
                 body: formData,
             });
