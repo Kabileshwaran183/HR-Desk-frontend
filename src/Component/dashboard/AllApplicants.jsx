@@ -51,6 +51,31 @@ const AllApplicantsPage = () => {
         setScheduledStatus((prev) => ({ ...prev, [id]: false }));
     };
 
+    // DELETE applicant function
+    const handleDeleteApplicant = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this applicant?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `https://hr-desk-backend.onrender.com/api/jobapplications/${id}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (response.ok) {
+                setApplications((prev) => prev.filter((app) => app._id !== id));
+                toast.success("Applicant deleted successfully.");
+            } else {
+                toast.error("Failed to delete applicant.");
+            }
+        } catch (error) {
+            toast.error("Server error while deleting applicant.");
+        }
+    };
+
     // Reusable function to apply a common date to applicants in a match percentage range
     const applyCommonDateToAll = (minPercent, maxPercent, date) => {
         if (!date) return;
@@ -135,7 +160,6 @@ const AllApplicantsPage = () => {
         <div className="p-6 bg-gray-100 min-h-screen">
             <h1 className="text-3xl font-bold text-center mb-6">All Applicants</h1>
             <div className="flex flex-col lg:flex-row gap-6 mb-10 items-center justify-center">
-              
                 {/* Low Range: 0% to 50% */}
                 <div className="mb-6 text-center">
                     <label className="block font-semibold mb-2 text-gray-700">
@@ -159,8 +183,8 @@ const AllApplicantsPage = () => {
                         onClick={() => handleBulkSchedule(0, 50, "low")}
                         disabled={bulkSchedulingStatus.low}
                         className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.low
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-600 hover:bg-green-700"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
                             }`}
                     >
                         {bulkSchedulingStatus.low
@@ -192,8 +216,8 @@ const AllApplicantsPage = () => {
                         onClick={() => handleBulkSchedule(50, 100, "high")}
                         disabled={bulkSchedulingStatus.high}
                         className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.high
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-600 hover:bg-green-700"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
                             }`}
                     >
                         {bulkSchedulingStatus.high
@@ -225,8 +249,8 @@ const AllApplicantsPage = () => {
                         onClick={() => handleBulkSchedule(0, 100, "full")}
                         disabled={bulkSchedulingStatus.full}
                         className={`px-6 py-3 rounded text-white font-semibold transition ${bulkSchedulingStatus.full
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-600 hover:bg-green-700"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
                             }`}
                     >
                         {bulkSchedulingStatus.full
@@ -235,7 +259,6 @@ const AllApplicantsPage = () => {
                     </button>
                 </div>
             </div>
-           
 
             {/* Applicant Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -254,9 +277,7 @@ const AllApplicantsPage = () => {
                                     {app.firstName} {app.lastName}
                                 </h2>
                                 <span
-                                    className={`text-xs px-2 py-1 rounded-full font-semibold ${isScheduled
-                                            ? "bg-green-600 text-white"
-                                            : "bg-yellow-500 text-white"
+                                    className={`text-xs px-2 py-1 rounded-full font-semibold ${isScheduled ? "bg-green-600 text-white" : "bg-yellow-500 text-white"
                                         }`}
                                 >
                                     {isScheduled ? "Scheduled" : "Pending"}
@@ -283,6 +304,13 @@ const AllApplicantsPage = () => {
                                 value={interviewDates[app._id] || ""}
                                 onChange={(e) => handleInterviewDateChange(app._id, e.target.value)}
                             />
+                            {/* Delete Button */}
+                            <button
+                                onClick={() => handleDeleteApplicant(app._id)}
+                                className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded font-semibold"
+                            >
+                                Delete Applicant
+                            </button>
                         </div>
                     );
                 })}
