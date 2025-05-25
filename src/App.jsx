@@ -11,6 +11,12 @@ import Register from "./Component/login/Register";
 import PrivateRoute from "./Component/PrivateRoute"; // import it
 import JobApplicants from "./Component/dashboard/JobApplicants";
 import JobInterviewManager from "./Component/dashboard/hr/JobInterviewManager";
+import Userlist from "./Component/dashboard/TaskList";
+import HRDashboard from "./Component/dashboard/HRDashboard";
+import Analysis from "./Component/dashboard/Analysis";
+import Tracking from "./Component/dashboard/Tracking";
+import AllApplicants from "./Component/dashboard/AllApplicants";
+import AddApplicant from "./Component/dashboard/AddApplicant";
 
 function App() {
   return (
@@ -28,8 +34,14 @@ function App() {
         />
         <Route path="/apply/:id" element={<JobApplication />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/job/:jobTitle" element={<JobApplicants />} />
-        <Route path="/interview/:jobTitle" element={<JobInterviewManager />} />
+        <Route path="/job/:jobTitle" element={<JobInterviewManager />} />
+        <Route path="/Dashboard/applicants" element={<Userlist />} />
+        <Route path="/Dashboard/add-applicant" element={<AddApplicant />} />
+       
+        <Route path="/Dashboard/ranking" element={<HRDashboard />} />
+        <Route path="/Dashboard/analytics" element={<Analysis />} />
+        <Route path="/Dashboard/tracking" element={<Tracking />} />
+        
 
         <Route
           path="/dashboard"

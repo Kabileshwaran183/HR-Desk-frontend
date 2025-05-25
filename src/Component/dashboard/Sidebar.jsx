@@ -1,8 +1,9 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaAviato } from "react-icons/fa";
 
 export default function Sidebar() {
+    const navigate = useNavigate();
     let user = {};
     try {
         user = JSON.parse(localStorage.getItem("user")) || {};
@@ -16,11 +17,20 @@ export default function Sidebar() {
 
     const navItems = [
         { name: "Dashboard", path: "/Dashboard" },
+        { name: "All Applicants", path: "/Dashboard/applicants" },
+        { name: "Add Applicant", path: "/Dashboard/add-applicant" },
+        { name: "Ranking", path: "/Dashboard/ranking" },
         { name: "Analytics", path: "/Dashboard/analytics" },
         { name: "Task List", path: "/Dashboard/task-list" },
         { name: "Tracking", path: "/Dashboard/tracking" },
         { name: "Setting", path: "/Dashboard/setting" },
     ];
+
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        // Optionally clear tokens or other items
+        navigate("/login"); // redirect to login page
+    };
 
     return (
         <aside className="w-60 bg-white p-6 shadow-md rounded-3xl flex flex-col gap-6">
@@ -44,15 +54,23 @@ export default function Sidebar() {
                     <Link
                         key={name}
                         to={path}
-                        className={`block text-left px-3 py-2 rounded-md ${location.pathname === path
-                                ? "bg-purple-100 text-purple-700 font-semibold"
-                                : "text-gray-600 hover:text-purple-700"
+                        className={`block text-left px-3 py-2 rounded-md ${location.pathname.startsWith(path)
+                            ? "bg-purple-100 text-purple-700 font-semibold"
+                            : "text-gray-600 hover:text-purple-700"
                             }`}
                     >
                         {name}
                     </Link>
                 ))}
             </nav>
+
+            {/* Logout button at the bottom */}
+            <button
+                onClick={handleLogout}
+                className="mt-auto px-3 py-2 text-sm rounded-md bg-red-100 text-red-600 hover:bg-red-200 font-medium"
+            >
+                Logout
+            </button>
         </aside>
     );
 }

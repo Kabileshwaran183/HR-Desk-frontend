@@ -1,103 +1,217 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 
-const JobInterviewManager = () => {
-    const { jobTitle } = useParams();
-    const [applicants, setApplicants] = useState([]);
+const JobinterviewManger = () => {
+    const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [ranks, setRanks] = useState({});
+    const [error, setError] = useState(null);
+    const [selectedJobTitle, setSelectedJobTitle] = useState(null);
+    const [interviewDates, setInterviewDates] = useState({});
+    const [scheduling, setScheduling] = useState({});
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        const fetchApplicants = async () => {
+        const fetchApplications = async () => {
             try {
-                const res = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications");
-                const data = await res.json();
-                const filtered = data.filter(
-                    (app) => (app.jobTitle || "").toLowerCase() === decodeURIComponent(jobTitle).toLowerCase()
-                );
-                setApplicants(filtered);
-            } catch (error) {
-                console.error("Error fetching applicants:", error);
+                const response = await fetch("https://hr-desk-backend.onrender.com/api/jobapplications");
+                if (!response.ok) throw new Error("Failed to fetch applications");
+                const data = await response.json();
+                setApplications(data);
+            } catch (err) {
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchApplicants();
-    }, [jobTitle]);
+        fetchApplications();
+    }, []);
 
-    const handleRankChange = (id, value) => {
-        setRanks({ ...ranks, [id]: value });
+    const jobTitles = Array.from(
+        new Set(applications.map((app) => app.jobTitle).filter(Boolean))
+    );
+
+    const filteredApplications = selectedJobTitle
+        ? applications.filter(
+            (app) =>
+                app.jobTitle &&
+                app.jobTitle.toLowerCase() === selectedJobTitle.toLowerCase()
+        )
+        : applications;
+
+    const sortedApplications = filteredApplications
+        .slice()
+        .sort((a, b) => (b.matchPercentage ?? 0) - (a.matchPercentage ?? 0));
+
+    const validateFields = (app) => {
+        const newErrors = {};
+        if (!app.email) newErrors.email = "Email is required.";
+        if (!app.firstName || !app.lastName) newErrors.name = "Full name is required.";
+        if (!interviewDates[app._id]) newErrors.date = "Interview date is required.";
+        return newErrors;
     };
 
-    const handleScheduleInterview = async (applicant) => {
-        const interviewDate = prompt("Enter Interview Date & Time (e.g., 2025-06-01T10:00):");
-        if (!interviewDate) return;
+    const handleSchedule = async (app) => {
+        const validationErrors = validateFields(app);
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors((prev) => ({ ...prev, [app._id]: validationErrors }));
+            return;
+        }
+
+        setErrors((prev) => ({ ...prev, [app._id]: {} }));
+        setScheduling((prev) => ({ ...prev, [app._id]: true }));
 
         try {
-            const res = await fetch("https://your-backend-api.com/api/schedule", {
+            const response = await fetch("https://hr-desk-backend.onrender.com/api/schedule", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    email: applicant.email,
-                    name: applicant.firstName + " " + applicant.lastName,
-                    dateTime: interviewDate,
-                    jobTitle,
+                    email: app.email,
+                    name: `${app.firstName} ${app.lastName}`,
+                    date: interviewDates[app._id],
                 }),
             });
 
-            const result = await res.json();
-            alert("Interview Scheduled: " + result.status);
-        } catch (err) {
-            console.error("Scheduling error:", err);
+            const result = await response.json();
+            alert(result.message || "Interview scheduled!");
+        } catch (error) {
+            console.error("Scheduling error:", error);
             alert("Failed to schedule interview.");
+        } finally {
+            setScheduling((prev) => ({ ...prev, [app._id]: false }));
         }
     };
 
     return (
-        <div className="max-w-5xl mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6 text-blue-800">
-                Manage Applicants for: "{decodeURIComponent(jobTitle)}"
-            </h1>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <h1 className="text-4xl font-bold text-blue-800 mb-8 text-center">Applicants Dashboard</h1>
 
-            {loading ? (
-                <p>Loading applicants...</p>
-            ) : applicants.length === 0 ? (
-                <p>No applicants found for this job.</p>
-            ) : (
-                applicants.map((app) => (
-                    <div
-                        key={app._id}
-                        className="bg-white shadow-md p-5 rounded-lg mb-4 border"
+            {/* Job Title Filter */}
+            <div className="flex flex-wrap gap-3 justify-center mb-8">
+                <button
+                    onClick={() => setSelectedJobTitle(null)}
+                    className={`px-4 py-2 rounded-full font-medium ${selectedJobTitle === null
+                            ? "bg-red-600 text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                >
+                    Show All
+                </button>
+                {jobTitles.map((title) => (
+                    <button
+                        key={title}
+                        onClick={() => setSelectedJobTitle(title)}
+                        className={`px-4 py-2 rounded-full font-medium ${selectedJobTitle === title
+                                ? "bg-red-600 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            }`}
                     >
-                        <h2 className="text-xl font-semibold">{app.firstName} {app.lastName}</h2>
-                        <p>Email: {app.email}</p>
-                        <p>Skills: {app.skills}</p>
-                        <p>Experience: {app.experience}</p>
+                        {title}
+                    </button>
+                ))}
+            </div>
 
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium mb-1">Rank this applicant:</label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="10"
-                                value={ranks[app._id] || ""}
-                                onChange={(e) => handleRankChange(app._id, e.target.value)}
-                                className="border p-2 rounded w-24"
-                            />
-                        </div>
-
-                        <button
-                            onClick={() => handleScheduleInterview(app)}
-                            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                        >
-                            Schedule Interview
-                        </button>
-                    </div>
-                ))
+            {/* Application Cards */}
+            {loading && <p className="text-center text-gray-500">Loading applications...</p>}
+            {error && <p className="text-center text-red-600">Error: {error}</p>}
+            {!loading && sortedApplications.length === 0 && (
+                <p className="text-center text-gray-600">No applications found.</p>
             )}
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+                {sortedApplications.map((app) => {
+                    const appErrors = errors[app._id] || {};
+                    const isDisabled =
+                        scheduling[app._id] ||
+                        !app.email ||
+                        !app.firstName ||
+                        !app.lastName ||
+                        !interviewDates[app._id];
+
+                    return (
+                        <div
+                            key={app._id}
+                            className="bg-white rounded-xl border shadow-md hover:shadow-lg p-6 transition duration-300 flex flex-col justify-between"
+                        >
+                            <div className="mb-4">
+                                <h2 className="text-2xl font-semibold text-blue-800 mb-1">
+                                    {app.firstName} {app.lastName}
+                                </h2>
+                                <p className="text-sm text-gray-500 mb-2">
+                                    Applied on: {new Date(app.createdAt).toLocaleDateString()}
+                                </p>
+                                <span
+                                    className={`text-sm px-2 py-1 rounded font-medium ${app.matchPercentage >= 75
+                                            ? "bg-green-600 text-white"
+                                            : app.matchPercentage >= 50
+                                                ? "bg-yellow-500 text-white"
+                                                : "bg-red-600 text-white"
+                                        }`}
+                                >
+                                    Match: {app.matchPercentage ?? "N/A"}%
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-700 text-sm mb-4">
+                                <p><strong>Email:</strong> {app.email}</p>
+                                <p><strong>Phone:</strong> {app.phoneNumber ?? "N/A"}</p>
+                                <p><strong>Gender:</strong> {app.gender ?? "N/A"}</p>
+                                <p><strong>Experience:</strong> {app.experience ?? "N/A"}</p>
+                                <p><strong>Location:</strong> {app.location ?? "N/A"}</p>
+                                <p><strong>Pincode:</strong> {app.pincode ?? "N/A"}</p>
+                                <p><strong>Graduation:</strong> {app.yearOfGraduation ?? "N/A"}</p>
+                                <p><strong>Status:</strong> {app.status ?? "Pending"}</p>
+                            </div>
+
+                            <div className="mb-4 text-sm">
+                                <p><strong>Skills:</strong> {app.skills}</p>
+                                <p className="mt-1">
+                                    <strong>Resume:</strong>{" "}
+                                    <a
+                                        href={app.resume}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 underline"
+                                    >
+                                        View Resume
+                                    </a>
+                                </p>
+                            </div>
+
+                            {/* Schedule Section */}
+                            <div className="mt-4 flex flex-col gap-2">
+                                <label className="font-medium text-sm text-gray-600">
+                                    Select Interview Date:
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    className={`w-full p-2 rounded border ${appErrors.date ? "border-red-500" : "border-gray-300"
+                                        }`}
+                                    value={interviewDates[app._id] || ""}
+                                    onChange={(e) =>
+                                        setInterviewDates({
+                                            ...interviewDates,
+                                            [app._id]: e.target.value,
+                                        })
+                                    }
+                                />
+                                {appErrors.date && <p className="text-red-500 text-sm">{appErrors.date}</p>}
+                                <button
+                                    onClick={() => handleSchedule(app)}
+                                    disabled={isDisabled}
+                                    className={`mt-2 px-4 py-2 text-white font-medium rounded ${isDisabled
+                                            ? "bg-gray-400 cursor-not-allowed"
+                                            : "bg-green-600 hover:bg-green-700"
+                                        }`}
+                                >
+                                    {scheduling[app._id] ? "Scheduling..." : "Schedule Interview"}
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };
 
-export default JobInterviewManager;
+export default JobinterviewManger;
