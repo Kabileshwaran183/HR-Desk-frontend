@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import ProjectCard from "./ProjectCard";
 import Userlist from "./TaskList";
+import JobApplicants from "./JobApplicants";
+import HRDashboard from "./HRDashboard";
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -98,8 +100,8 @@ const Dashboard = () => {
                     <p className="text-gray-500 mb-8">No submitted job applications found.</p>
                 )}
 
-
-                <Userlist />
+                <JobApplicants />
+                <HRDashboard />
             </main>
         </div>
     );
