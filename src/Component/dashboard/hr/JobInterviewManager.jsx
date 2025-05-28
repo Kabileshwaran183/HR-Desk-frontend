@@ -164,17 +164,7 @@ const JobinterviewManger = () => {
 
                             <div className="mb-4 text-sm">
                                 <p><strong>Skills:</strong> {app.skills}</p>
-                                <p className="mt-1">
-                                    <strong>Resume:</strong>{" "}
-                                    <a
-                                        href={app.resume}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 underline"
-                                    >
-                                        View Resume
-                                    </a>
-                                </p>
+                              
                             </div>
 
                             {/* Schedule Section */}
