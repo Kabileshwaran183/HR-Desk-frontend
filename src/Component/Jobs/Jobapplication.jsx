@@ -123,7 +123,7 @@ const JobApplication = () => {
         } finally {
             setIsSubmitting(false); // Reset submitting state after submission
         }
-        
+
     };
 
     // Function to Extract Text from PDF (for Regex Extraction of Email & Phone)
@@ -197,9 +197,9 @@ const JobApplication = () => {
 
                 setSkills(extractedSkills);
 
-              const extractedExperience = result.data.work_experience
-  ?.map(exp => `${exp.job_title} at ${exp.organisation}, ${exp.dates?.start_date || ""} - ${exp.dates?.end_date || "Present"}`)
-  .join("\n") || "No work experience found";
+                const extractedExperience = result.data.work_experience
+                    ?.map(exp => `${exp.job_title} at ${exp.organisation}, ${exp.dates?.start_date || ""} - ${exp.dates?.end_date || "Present"}`)
+                    .join("\n") || "No work experience found";
 
                 setExperience(extractedExperience);
 
@@ -477,7 +477,7 @@ const JobApplication = () => {
                         onClick={handleSubmit}
                         type="submit"
                         disabled={isSubmitting}
-                    className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${isSubmitting
+                        className={`w-48 text-white p-3 rounded-lg transition duration-300 flex items-center justify-center ${isSubmitting
                             ? 'bg-blue-400 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700'
                             }`}
